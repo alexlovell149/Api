@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>90's NostalGIF</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>90s NostalGIF</h1>
+
+<!-- button for generating gifs -->
+        <div id="button"></div>
+
+        <br><br>
+
+	<!-- form for adding new buttons to the gif array -->
+        <form id="90-form">
+            <label for="90-input">Add a Memory</label>
+            <br>
+            <input type="text" id="nineties-input">
+            <br>
+            <input id="add-me" type="submit" value="Add a Memory">
+        </form>
+
+        <hr>
+
+	<!-- div for the giphy images -->
+        <div id="gif"></div>
+
+
+
+        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+        <script type="text/javascript">
+
+        		// giphy images array
+        var nineties = ["Seinfeld", "Rugrats", "Nickelodeon", "Grunge", "90s", "Doug", "Backstreet Boys", "Minesweeper", "Gameboy", "Nintendo", "Bill Nye", "mtv", "wwf", "Big Lebowski"];
+        	// how i will call the api and get my images to display in gif div
+        function displayGif() {
+            var ninety = $(this).attr("data-name");
+
+            var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + ninety + "&api_key=dc6zaTOxFJmzC&limit=10";
+            console.log(queryURL);
+
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            }).done(function(response) {
+            	// JSON for how to properly call from the giphy api and use the array
+                for (var i = 0; i < response.data.length; i++) {
+
+                    var ninetydiv = $("<div id='gif'>");
+                    // giphy rating for each image in the index
+                    var rating = response.data[i].rating;
+                    // creating a paragrapgh tag where the rating will go
+                    var p = $("<p>").text("Rating: " + rating);
+                    // adding the p tag to the gif div
+                    ninetydiv.append(p);
+
+                	// creating an image tag that will be added to the gif div along with the p tag
+                    var image = $("<img>");
+                	// this will allow me to manipulate the css of this image better
+                    image.addClass("gif");
+
+
+					// var that will include the JSON for animated gifs
+                    var animate = response.data[i].images.fixed_height.url;
+                    // var that will include the JSON for the still gifs 
+                    var still = response.data[i].images.fixed_height_still.url;
+
+                    // adding the image tag to the gif div
+                    ninetydiv.append(image);
+                    // adding all of the above to the gif div 
+                    $("#gif").prepend(ninetydiv);
+
+                    // adding attributes that allow me to play and pause my gifs
+                    image.attr({"still":still, "animate":animate, "src":animate, "state": "still"});
+
+
+                
+        // when the image is clicked it will play/pause
+      $(image).on("click", function() {
+      // The attr jQuery method allows us to get or set the value of any attribute on our HTML element
+      var state = $(this).attr("state");
+      var source = $(this).attr("src");
+      // If the clicked image's state is still, update its src attribute to what its data-animate value is.
+      // Then, set the image's data-state to animate
+      // Else set src to the data-still value
+      if (state === "still") {
+        $(this).attr("src", $(this).attr("animate"));
+        $(this).attr("state", "animate");
+      } 
+      else {
+        $(this).attr("src", $(this).attr("still"));
+        $(this).attr("state", "still");
+
+      }
+    });
+
+
+
+      			}
+
+            });
+
+        }
+
+        // displays the gif buttons already in my array and the ones that can be added in the text box
+        function renderButtons() {
+
+            $("#button").empty();
+           // loops through all array and creates buttons and can be added to
+            for (var i = 0; i < nineties.length; i++) {
+
+                var b = $("<button>");
+                // allows for styling of buttons and appending to the html
+              	b.addClass("90s");
+              	// adds a data-anme to the array
+                b.attr("data-name", nineties[i]);
+                // adds text to the buttons
+                b.text(nineties[i]);
+                // appends to the html page
+                $("#button").append(b);
+            }
+
+
+        }
+        // when a button is added to the box and submitted the default of reloading the page is stopped
+        $("#add-me").on("click", function(event) {
+
+            event.preventDefault();
+
+            var nine = $("#nineties-input").val().trim();
+            // the orginal array has the new buttons added to it with push
+            nineties.push(nine);
+            // this console logs the function renderButtons..
+            renderButtons();
+
+        });
+
+        // after all the functions are run we can now display everything to the page
+
+        $(document).on("click", ".90s", displayGif);
+
+        renderButtons();
+
+        </script>
+    </div>
+</body>
+
+</html>
